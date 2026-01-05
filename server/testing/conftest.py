@@ -7,3 +7,16 @@ def pytest_itemcollected(item):
     suf = node.__doc__.strip() if node.__doc__ else node.__name__
     if pref or suf:
         item._nodeid = ' '.join((pref, suf))
+
+import pytest
+from app import app, db
+
+
+@pytest.fixture(autouse=True)
+def app_context():
+    with app.app_context():
+        db.create_all()
+        yield
+        db.session.rollback()
+        db.drop_all()
+
